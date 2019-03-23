@@ -4,11 +4,17 @@
             <comment v-bind:comment="comment"></comment>
         </div>
 
-        <div class="aParent">
-            <div>
-                <font-awesome-icon icon="comment"/>
+        <div>
+            <div class="aParent" v-if="!isAddCommentSelected">
+                <div>
+                    <font-awesome-icon icon="comment"/>
+                </div>
+                <div @click="selectAddComment(post)">Add comment</div>
             </div>
-            <div @click="addComment(post)">Add comment</div>
+            <h1 v-else>
+                <input type="text" v-model="newCommentText" value="Comment text..."/>
+                <button class="btn btn-outline-dark" @click="addComment(post, newCommentText)">Comment</button>
+            </h1>
         </div>
     </div>
 </template>
@@ -22,7 +28,9 @@
         components: { Comment },
         data: () => {
             return {
-                comments: []
+                newCommentText: "",
+                comments: [],
+                isAddCommentSelected: false
             }
         },
         props: {
@@ -51,14 +59,19 @@
                         console.error(error)
                     })
             },
-            addComment: function(post) {
+            selectAddComment: function() {
+               this.isAddCommentSelected = true;
+            },
+            addComment: function(post, comment) {
                 const jwt = this.$cookie.get('jwt');
                 axios.post(post._links.comments.href, {
-                    text: "New comment on post " + post.id,
+                    text: comment,
                     postId: post.id,
                 }, {headers: {'Authorization': jwt}})
                     .then(result => {
-                        console.log('NEW POST: ' + JSON.stringify(result))
+                        console.log('NEW POST: ' + JSON.stringify(result));
+                        this.newCommentText = "";
+                        this.isAddCommentSelected = false;
                         this.comments.push(result.data);
                     }, error => {
                         console.error(error)

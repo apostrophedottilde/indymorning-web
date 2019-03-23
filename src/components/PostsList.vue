@@ -5,8 +5,9 @@
         </div>
 
         <div class="mt-4">
-            <textarea></textarea>
-            <input type="button" class="btn btn-outline-dark" @click="addPost(postsUri, threadId)" value="Add post"></input>
+            <textarea v-model="newPostText"></textarea>
+            {{newPostText}}
+            <input type="button" class="btn btn-outline-dark" @click="addPost(postsUri, threadId, newPostText)" value="Add post"></input>
         </div>
     </div>
 </template>
@@ -25,6 +26,7 @@
         components: { Post },
         data: () => {
             return {
+                newPostText: "",
                 posts: []
             }
         },
@@ -48,13 +50,14 @@
                         console.error(error)
                     })
             },
-            addPost: function(url, threadId) {
+            addPost: function(url, threadId, newPostText) {
                 const jwt = this.$cookie.get('jwt');
                 axios.post(url, {
-                    text: "EXCALIBUR",
+                    text: newPostText,
                     threadId: threadId,
                 }, {headers: {'Authorization': jwt}})
                     .then(result => {
+                        this.newPostText = "";
                         this.posts.push(result.data);
                     }, error => {
                         console.error(error)
